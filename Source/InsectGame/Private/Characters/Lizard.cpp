@@ -107,6 +107,12 @@ void ALizard::LMB()
 	PlaceTower();
 }
 
+void ALizard::LShift()
+{
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Black, TEXT("LShift"));
+}
+
 void ALizard::ESC()
 {
 	if (GEngine)
@@ -203,6 +209,7 @@ void ALizard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(EKeyAction, ETriggerEvent::Started, this, &ALizard::EKey);
 		EnhancedInputComponent->BindAction(RKeyAction, ETriggerEvent::Started, this, &ALizard::RKey);
 		EnhancedInputComponent->BindAction(LMBAction, ETriggerEvent::Started, this, &ALizard::LMB);
+		EnhancedInputComponent->BindAction(LShiftAction, ETriggerEvent::Started, this, &ALizard::LShift);
 		EnhancedInputComponent->BindAction(ESCAction, ETriggerEvent::Started, this, &ALizard::ESC);
 	}
 }
