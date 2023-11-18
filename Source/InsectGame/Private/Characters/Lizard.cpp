@@ -29,6 +29,8 @@ ALizard::ALizard()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	ViewCamera->SetupAttachment(SpringArm);
 
+	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MaxStepHeight = 45.f;
 }
 
 void ALizard::BeginPlay()
@@ -111,6 +113,23 @@ void ALizard::LShift()
 {
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Black, TEXT("LShift"));
+	LShift_Toggle = !LShift_Toggle;
+	if (LShift_Toggle)
+	{
+		GetRootComponent()->SetWorldScale3D(FVector(0.05f, 0.05f, 0.05f));
+		SpringArm->TargetArmLength *= .05f;
+		GetCharacterMovement()->MaxWalkSpeed = 250.f;
+		GetCharacterMovement()->MaxStepHeight *= .05f;
+		SpringArm->ProbeSize *= 0.05f;
+	}
+	else
+	{
+		GetRootComponent()->SetWorldScale3D(FVector(1.f, 1.f, 1.f));
+		SpringArm->TargetArmLength = 200.f;
+		GetCharacterMovement()->MaxWalkSpeed = 500.f;
+		GetCharacterMovement()->MaxStepHeight = 45.f;
+		SpringArm->ProbeSize = 12.f;
+	}
 }
 
 void ALizard::ESC()

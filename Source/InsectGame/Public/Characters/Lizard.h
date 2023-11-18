@@ -60,6 +60,7 @@ protected:
 private:
 	//Values
 	bool E_Toggle = false;
+	bool LShift_Toggle = false;
 	bool bCanPlace = false;
 	int32 PreviewTowerIndex = 0;
 	//Cache
