@@ -27,6 +27,19 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void Jump() override;
+	//Stats
+	UPROPERTY(EditAnywhere)
+	float ShrinkScale = .05f;
+	UPROPERTY(EditAnywhere)
+	float SpringArmLength = 200.f;
+	UPROPERTY(EditAnywhere)
+	float ProbeSize = 12.f;
+	UPROPERTY(EditAnywhere)
+	float StepHeight = 45.f;
+	UPROPERTY(EditAnywhere)
+	float Big_WalkSpeed = 500.f;
+	UPROPERTY(EditAnywhere)
+	float Small_WalkSpeed = 150.f;
 
 protected:
 	virtual void BeginPlay() override;
@@ -60,9 +73,11 @@ protected:
 private:
 	//Values
 	bool E_Toggle = false;
-	bool LShift_Toggle = false;
+	bool bIsBig = true;
+	bool bIsResizing = false;
 	bool bCanPlace = false;
 	int32 PreviewTowerIndex = 0;
+	float ResizeProgress = 0;
 	//Cache
 	UPROPERTY(VisibleAnywhere)
 	UBaseGameInstance* GameInstance;
@@ -92,4 +107,7 @@ private:
 	void PreviewTower(int32 index);
 	UFUNCTION(CallInEditor, BlueprintCallable, Category = "Functions")
 	void PlaceTower();
+
+	UFUNCTION()
+	void UpdateSize(float DeltaTime);
 };

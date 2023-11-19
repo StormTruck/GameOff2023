@@ -24,13 +24,13 @@ ALizard::ALizard()
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
-	SpringArm->TargetArmLength = 200.f;
+	SpringArm->TargetArmLength = SpringArmLength;
 
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CharacterCamera"));
 	ViewCamera->SetupAttachment(SpringArm);
 
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
-	GetCharacterMovement()->MaxStepHeight = 45.f;
+	GetCharacterMovement()->MaxWalkSpeed = Big_WalkSpeed;
+	GetCharacterMovement()->MaxStepHeight = StepHeight;
 }
 
 void ALizard::BeginPlay()
@@ -113,12 +113,16 @@ void ALizard::LShift()
 {
 	if (GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Black, TEXT("LShift"));
-	LShift_Toggle = !LShift_Toggle;
+	if (bIsResizing)
+		return;
+	ResizeProgress = 0;
+	bIsResizing = true;
+	/*
 	if (LShift_Toggle)
 	{
 		GetRootComponent()->SetWorldScale3D(FVector(0.05f, 0.05f, 0.05f));
-		SpringArm->TargetArmLength *= .05f;
-		GetCharacterMovement()->MaxWalkSpeed = 250.f;
+		SpringArm->TargetArmLength *= .1f;
+		GetCharacterMovement()->MaxWalkSpeed = 150.f;
 		GetCharacterMovement()->MaxStepHeight *= .05f;
 		SpringArm->ProbeSize *= 0.05f;
 	}
@@ -129,7 +133,7 @@ void ALizard::LShift()
 		GetCharacterMovement()->MaxWalkSpeed = 500.f;
 		GetCharacterMovement()->MaxStepHeight = 45.f;
 		SpringArm->ProbeSize = 12.f;
-	}
+	}*/
 }
 
 void ALizard::ESC()
@@ -215,6 +219,42 @@ void ALizard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	RayTrace();
+	if (bIsResizing)
+		UpdateSize(DeltaTime);
+}
+
+void ALizard::UpdateSize(float DeltaTime)
+{
+	if (!bIsResizing)
+		return;
+	if (bIsBig)
+	{
+		ResizeProgress = FMath::Clamp(ResizeProgress + (DeltaTime / .5f), 0.0f, 1.0f);
+		GetRootComponent()->SetWorldScale3D(FMath::Lerp(FVector(1.f, 1.f, 1.f), FVector(ShrinkScale, ShrinkScale, ShrinkScale), ResizeProgress));
+		SpringArm->TargetArmLength = FMath::Lerp(SpringArmLength, SpringArmLength * ShrinkScale * 2.f, ResizeProgress);
+		GetCharacterMovement()->MaxWalkSpeed = FMath::Lerp(Big_WalkSpeed, Small_WalkSpeed, ResizeProgress);
+		GetCharacterMovement()->MaxStepHeight = FMath::Lerp(StepHeight, StepHeight * ShrinkScale, ResizeProgress);
+		SpringArm->ProbeSize = FMath::Lerp(ProbeSize, ProbeSize * ShrinkScale, ResizeProgress);
+		if (ResizeProgress >= 1.f)
+		{
+			bIsResizing = false;
+			bIsBig = false;
+		}
+	}
+	else
+	{
+		ResizeProgress = FMath::Clamp(ResizeProgress + (DeltaTime / .5f), 0.0f, 1.0f);
+		GetRootComponent()->SetWorldScale3D(FMath::Lerp(FVector(ShrinkScale, ShrinkScale, ShrinkScale), FVector(1.f, 1.f, 1.f), ResizeProgress));
+		SpringArm->TargetArmLength = FMath::Lerp(SpringArmLength * ShrinkScale * 2.f, SpringArmLength, ResizeProgress);
+		GetCharacterMovement()->MaxWalkSpeed = FMath::Lerp(Small_WalkSpeed, Big_WalkSpeed, ResizeProgress);
+		GetCharacterMovement()->MaxStepHeight = FMath::Lerp(StepHeight * ShrinkScale, StepHeight, ResizeProgress);
+		SpringArm->ProbeSize = FMath::Lerp(ProbeSize * ShrinkScale, ProbeSize, ResizeProgress);
+		if (ResizeProgress >= 1.f)
+		{
+			bIsResizing = false;
+			bIsBig = true;
+		}
+	}
 }
 
 void ALizard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
