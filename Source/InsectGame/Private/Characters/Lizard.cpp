@@ -117,23 +117,6 @@ void ALizard::LShift()
 		return;
 	ResizeProgress = 0;
 	bIsResizing = true;
-	/*
-	if (LShift_Toggle)
-	{
-		GetRootComponent()->SetWorldScale3D(FVector(0.05f, 0.05f, 0.05f));
-		SpringArm->TargetArmLength *= .1f;
-		GetCharacterMovement()->MaxWalkSpeed = 150.f;
-		GetCharacterMovement()->MaxStepHeight *= .05f;
-		SpringArm->ProbeSize *= 0.05f;
-	}
-	else
-	{
-		GetRootComponent()->SetWorldScale3D(FVector(1.f, 1.f, 1.f));
-		SpringArm->TargetArmLength = 200.f;
-		GetCharacterMovement()->MaxWalkSpeed = 500.f;
-		GetCharacterMovement()->MaxStepHeight = 45.f;
-		SpringArm->ProbeSize = 12.f;
-	}*/
 }
 
 void ALizard::ESC()
@@ -154,7 +137,7 @@ void ALizard::RayTrace()
 	TraceParams.AddIgnoredActor(this);
 	TraceParams.TraceTag = FName("FloorTrace");
 
-	float TraceDistance = 600.0f;
+	float TraceDistance = PlaceObjectDistance * 6;
 	FVector TraceEnd = CameraLocation + (TraceDirection * TraceDistance);
 
 	FHitResult HitResult;
@@ -163,11 +146,11 @@ void ALizard::RayTrace()
 	AActor* HitActor = HitResult.GetActor();
 	if (GEngine)
 	{
-		FColor DebugColor = bHit && (FVector::Dist(HitResult.ImpactPoint, GetActorLocation()) > 100.f) && HitActor->ActorHasTag("Placable") ? FColor::Green : FColor::Red;
+		FColor DebugColor = bHit && (FVector::Dist(HitResult.ImpactPoint, GetActorLocation()) > PlaceObjectDistance) && HitActor->ActorHasTag("Placable") ? FColor::Green : FColor::Red;
 		DrawDebugLine(GetWorld(), CameraLocation, TraceEnd, DebugColor, false, -1, 0, 1.0f);
 	}
 
-	if (bHit && (FVector::Dist(HitResult.ImpactPoint, GetActorLocation()) > 100.f) && HitActor->ActorHasTag("Placable"))
+	if (bHit && (FVector::Dist(HitResult.ImpactPoint, GetActorLocation()) > PlaceObjectDistance) && HitActor->ActorHasTag("Placable"))
 	{
 		//Note: initialize RayHitLocation when beginning raytrace, currently 0,0,0
 		RayHitLocation = HitResult.ImpactPoint;
@@ -235,6 +218,7 @@ void ALizard::UpdateSize(float DeltaTime)
 		GetCharacterMovement()->MaxWalkSpeed = FMath::Lerp(Big_WalkSpeed, Small_WalkSpeed, ResizeProgress);
 		GetCharacterMovement()->MaxStepHeight = FMath::Lerp(StepHeight, StepHeight * ShrinkScale, ResizeProgress);
 		SpringArm->ProbeSize = FMath::Lerp(ProbeSize, ProbeSize * ShrinkScale, ResizeProgress);
+		PlaceObjectDistance = FMath::Lerp(MaxPlaceObjectDistance, MaxPlaceObjectDistance * ShrinkScale * 2.f, ResizeProgress);
 		if (ResizeProgress >= 1.f)
 		{
 			bIsResizing = false;
@@ -249,6 +233,7 @@ void ALizard::UpdateSize(float DeltaTime)
 		GetCharacterMovement()->MaxWalkSpeed = FMath::Lerp(Small_WalkSpeed, Big_WalkSpeed, ResizeProgress);
 		GetCharacterMovement()->MaxStepHeight = FMath::Lerp(StepHeight * ShrinkScale, StepHeight, ResizeProgress);
 		SpringArm->ProbeSize = FMath::Lerp(ProbeSize * ShrinkScale, ProbeSize, ResizeProgress);
+		PlaceObjectDistance = FMath::Lerp(MaxPlaceObjectDistance * ShrinkScale * 2.f, MaxPlaceObjectDistance, ResizeProgress);
 		if (ResizeProgress >= 1.f)
 		{
 			bIsResizing = false;

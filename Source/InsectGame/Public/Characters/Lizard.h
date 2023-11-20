@@ -40,6 +40,10 @@ public:
 	float Big_WalkSpeed = 500.f;
 	UPROPERTY(EditAnywhere)
 	float Small_WalkSpeed = 150.f;
+	UPROPERTY(EditAnywhere)
+	float PlaceObjectDistance = 100.f;
+	UPROPERTY(EditAnywhere)
+	float MaxPlaceObjectDistance = 100.f;
 
 protected:
 	virtual void BeginPlay() override;
