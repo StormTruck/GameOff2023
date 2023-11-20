@@ -46,7 +46,7 @@ void AGameManager::StartPrepPhase()
 
 void AGameManager::StartAttackPhase()
 {
-	if (LockStartWave)
+	if (LockStartWave || CurrentWave >= Waves.Num())
 		return;
 	LockStartWave = true;
 	if (GEngine)
